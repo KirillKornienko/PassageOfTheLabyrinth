@@ -26,7 +26,7 @@ namespace PassageOfTheLabyrinth
     class Labyrinth
     {
         char[,] labyrinth;
-        bool IsPenetrable;
+        public bool IsPenetrable { get; private set; }
 
         public Labyrinth(char[,] labyrinth)
         {
@@ -34,14 +34,16 @@ namespace PassageOfTheLabyrinth
         }
 
         /// <summary>
-        /// Начинает прохождение лабиринта
+        /// Начинает прохождение лабиринта, возвращает кратчайший путь
         /// </summary>
-        /// <returns></returns>
         public int Start()
         {
             return GoDown(0, 0);
         }
 
+        /// <summary>
+        /// Начинает прохождение лабиринта, возвращает результат прохождения
+        /// </summary>
         public bool GetPenetrable()
         {
             GoDown(0, 0);
