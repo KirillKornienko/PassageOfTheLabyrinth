@@ -9,8 +9,8 @@ namespace PassageOfTheLabyrinth
             char[,] array = new char[,]
             {
                 { '.','.','.','.','#','.'},
-                { '.','#','.','#','#','.'},
-                { '.','.','#','.','.','#'},
+                { '.','#','.','.','#','.'},
+                { '.','#','#','.','.','#'},
                 { '#','.','.','.','#','.'},
                 { '.','.','#','.','.','.'}
             };
@@ -27,6 +27,7 @@ namespace PassageOfTheLabyrinth
     {
         char[,] labyrinth;
         public bool IsPenetrable { get; private set; }
+        bool IsStarted = false;
 
         public Labyrinth(char[,] labyrinth)
         {
@@ -38,7 +39,12 @@ namespace PassageOfTheLabyrinth
         /// </summary>
         public int Start()
         {
-            return GoDown(0, 0);
+            IsStarted = true;
+            int tmp = GoDown(0, 0);
+            if (tmp == int.MaxValue)
+                return -1;
+            else
+                return tmp;
         }
 
         /// <summary>
@@ -46,7 +52,9 @@ namespace PassageOfTheLabyrinth
         /// </summary>
         public bool GetPenetrable()
         {
-            GoDown(0, 0);
+            if(!IsStarted)
+                Start();
+
             return IsPenetrable;
         }
 
@@ -58,20 +66,19 @@ namespace PassageOfTheLabyrinth
             else
             {
                 if (length == labyrinth.Length)
-                    return -1;
+                    return int.MaxValue;
 
                 int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : -1;
+                        GoDown(x + 1, y, length + 1) : int.MaxValue;
                 int b = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : -1;
+                        GoRight(x, y + 1, length + 1) : int.MaxValue;
                 int c = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : -1;
+                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
 
-                if (a > b && a > c) return a;
-                if (b > a && b > c) return b;
-                if (c > a && c > b) return c;
+                if (a <= b && a <= c) return a;
+                if (b <= a && b <= c) return b;
 
-                return -1;
+                return c;
             }
         }
 
@@ -82,20 +89,19 @@ namespace PassageOfTheLabyrinth
             else
             {
                 if (length == labyrinth.Length)
-                    return -1;
+                    return int.MaxValue;
 
                 int a = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : -1;
+                        GoRight(x, y + 1, length + 1) : int.MaxValue;
                 int b = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : -1;
+                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
                 int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : -1;
+                        GoUp(x - 1, y, length + 1) : int.MaxValue;
 
-                if (a > b && a > c) return a;
-                if (b > a && b > c) return b;
-                if (c > a && c > b) return c;
+                if (a <= b && a <= c) return a;
+                if (b <= a && b <= c) return b;
 
-                return -1;
+                return c;
             }
         }
 
@@ -106,20 +112,19 @@ namespace PassageOfTheLabyrinth
             else
             {
                 if (length == labyrinth.Length)
-                    return -1;
+                    return int.MaxValue;
 
                 int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : -1;
+                        GoDown(x + 1, y, length + 1) : int.MaxValue;
                 int b = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : -1;
+                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
                 int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : -1;
+                        GoUp(x - 1, y, length + 1) : int.MaxValue;
 
-                if (a > b && a > c) return a;
-                if (b > a && b > c) return b;
-                if (c > a && c > b) return c;
+                if (a <= b && a <= c) return a;
+                if (b <= a && b <= c) return b;
 
-                return -1;
+                return c;
             }
         }
 
@@ -130,20 +135,19 @@ namespace PassageOfTheLabyrinth
             else
             {
                 if (length == labyrinth.Length)
-                    return -1;
+                    return int.MaxValue;
 
                 int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : -1;
+                        GoDown(x + 1, y, length + 1) : int.MaxValue;
                 int b = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : -1;
+                        GoRight(x, y + 1, length + 1) : int.MaxValue;
                 int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : -1;
+                        GoUp(x - 1, y, length + 1) : int.MaxValue;
 
-                if (a > b && a > c) return a;
-                if (b > a && b > c) return b;
-                if (c > a && c > b) return c;
+                if (a <= b && a <= c) return a;
+                if (b <= a && b <= c) return b;
 
-                return -1;
+                return c;
             }
         }
 
