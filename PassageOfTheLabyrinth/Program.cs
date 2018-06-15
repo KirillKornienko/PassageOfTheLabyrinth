@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace PassageOfTheLabyrinth
+namespace MyAlgoritm
 {
     class Program
     {
@@ -8,170 +9,130 @@ namespace PassageOfTheLabyrinth
         {
             char[,] array = new char[,]
             {
-                { '.','.','.','.','#','.'},
-                { '.','#','.','.','#','.'},
-                { '.','#','#','.','.','#'},
-                { '#','.','.','.','#','.'},
-                { '.','.','#','.','.','.'}
+                { '.','.','.','.','.','.'},
+                { '.','.','.','.','.','.'},
+                { '.','.','.','.','.','.'},
+                { '.','.','.','.','.','.'},
+                { '.','.','.','.','.','.'},
             };
 
-            Labyrinth labb = new Labyrinth(array);
-            Console.WriteLine(
-                labb.Start());
+            Labyrinth lab = new Labyrinth(array);
+            lab.Start(0, 0);
 
-            Console.WriteLine(
-                labb.GetPenetrable());
+            Console.WriteLine(lab.GetLength());
+            Console.WriteLine(lab.GetPenetrable());
+
         }
     }
     class Labyrinth
     {
+        List<LabyrinthCell> list;
         char[,] labyrinth;
-        public bool IsPenetrable { get; private set; }
+        int[,] WaweLabyrinth;
+        bool IsPenetrable;
         bool IsStarted = false;
 
         public Labyrinth(char[,] labyrinth)
         {
+            list = new List<LabyrinthCell>();
             this.labyrinth = labyrinth;
+            WaweLabyrinth = new int[labyrinth.GetLength(0), labyrinth.GetLength(1)];
+
+            //Стартовая инициализация волнового поля
+            for (int x = 0; x < labyrinth.GetLength(1); x++)
+            {
+                for (int y = 0; y < labyrinth.GetLength(0); y++)
+                {
+                    if (labyrinth[y, x] == '#')
+                        WaweLabyrinth[y, x] = -1;
+                    else
+                        WaweLabyrinth[y, x] = int.MaxValue;
+                }
+            }
         }
 
         /// <summary>
-        /// Начинает прохождение лабиринта, возвращает кратчайший путь
+        /// Создает волновой алгоритм
         /// </summary>
-        public int Start()
+        /// <param name="x">Координата X старта</param>
+        /// <param name="y">Координата Y старта</param>
+        /// <param name="length">Начальное значение длины пути, по умолчанию 0</param>
+        /// <param name="start">true для распространения волны, по умолчанию true</param>
+        public void Start(int x, int y, int length = 0, bool start = true)
         {
-            IsStarted = true;
-            int tmp = GoDown(0, 0);
-            if (tmp == int.MaxValue)
-                return -1;
-            else
-                return tmp;
+            if (GetCell(x, y) <= length)
+                return;
+
+            WaweLabyrinth[y, x] = length;
+
+            if (GetCell(x, y + 1) != -1 && GetCell(x, y + 1) > length + 1)
+                list.Add(new LabyrinthCell(x, y + 1, length + 1));
+            if (GetCell(x + 1, y) != -1 && GetCell(x + 1, y) > length + 1)
+                list.Add(new LabyrinthCell(x + 1, y, length + 1));
+            if (GetCell(x, y - 1) != -1 && GetCell(x, y - 1) > length + 1)
+                list.Add(new LabyrinthCell(x, y - 1, length + 1));
+            if (GetCell(x - 1, y) != -1 && GetCell(x - 1, y) > length + 1)
+                list.Add(new LabyrinthCell(x - 1, y, length + 1));
+
+            if (start)
+                while (list.Count != 0)
+                {
+                    Start(list[0].x, list[0].y, list[0].length, false);
+                    list.RemoveAt(0);
+                    if (GetCell(WaweLabyrinth.GetLength(1) - 1,
+                        WaweLabyrinth.GetLength(0) - 1) != int.MaxValue
+                        && GetCell(WaweLabyrinth.GetLength(1) - 1, 
+                        WaweLabyrinth.GetLength(0) - 1) != -1)
+                    {
+                        IsPenetrable = true;
+                        break;
+                    }
+                }
         }
 
-        /// <summary>
-        /// Начинает прохождение лабиринта, возвращает результат прохождения
-        /// </summary>
+
         public bool GetPenetrable()
         {
-            if(!IsStarted)
-                Start();
+            if (!IsStarted)
+                Start(0, 0, 0, true);
 
             return IsPenetrable;
         }
 
-        //Методы перемещения по лабиринту с возвращением длины пути
-        int GoDown(int x, int y, int length = 0)
+        public int GetLength()
         {
-            if (IsReady(x, y))
-                return length;
-            else
-            {
-                if (length == labyrinth.Length)
-                    return int.MaxValue;
+            if (!IsStarted)
+                Start(0, 0, 0, true);
 
-                int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : int.MaxValue;
-                int b = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : int.MaxValue;
-                int c = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
+            if (GetCell(WaweLabyrinth.GetLength(1) - 1,
+                WaweLabyrinth.GetLength(0) - 1) == int.MaxValue)
+                return -1;
 
-                if (a <= b && a <= c) return a;
-                if (b <= a && b <= c) return b;
-
-                return c;
-            }
+            return GetCell(WaweLabyrinth.GetLength(1) - 1,
+                   WaweLabyrinth.GetLength(0) - 1);
         }
 
-        int GoUp(int x, int y, int length)
+        int GetCell(int x, int y)
         {
-            if (IsReady(x, y))
-                return length;
-            else
-            {
-                if (length == labyrinth.Length)
-                    return int.MaxValue;
+            if (x >= 0 && y >= 0 && x < WaweLabyrinth.GetLength(1)
+                && y < WaweLabyrinth.GetLength(0) && WaweLabyrinth[y, x] != -1)
+                return WaweLabyrinth[y, x];
 
-                int a = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : int.MaxValue;
-                int b = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
-                int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : int.MaxValue;
-
-                if (a <= b && a <= c) return a;
-                if (b <= a && b <= c) return b;
-
-                return c;
-            }
+            return -1;
         }
 
-        int GoLeft(int x, int y, int length)
+        class LabyrinthCell
         {
-            if (IsReady(x, y))
-                return length;
-            else
+            public readonly int x;
+            public readonly int y;
+            public readonly int length;
+
+            public LabyrinthCell(int x, int y, int length)
             {
-                if (length == labyrinth.Length)
-                    return int.MaxValue;
-
-                int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : int.MaxValue;
-                int b = InTheArray(x, y - 1) ?
-                        GoLeft(x, y - 1, length + 1) : int.MaxValue;
-                int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : int.MaxValue;
-
-                if (a <= b && a <= c) return a;
-                if (b <= a && b <= c) return b;
-
-                return c;
+                this.x = x;
+                this.y = y;
+                this.length = length;
             }
-        }
-
-        int GoRight(int x, int y, int length)
-        {
-            if (IsReady(x, y))
-                return length;
-            else
-            {
-                if (length == labyrinth.Length)
-                    return int.MaxValue;
-
-                int a = InTheArray(x + 1, y) ?
-                        GoDown(x + 1, y, length + 1) : int.MaxValue;
-                int b = InTheArray(x, y + 1) ?
-                        GoRight(x, y + 1, length + 1) : int.MaxValue;
-                int c = InTheArray(x - 1, y) ?
-                        GoUp(x - 1, y, length + 1) : int.MaxValue;
-
-                if (a <= b && a <= c) return a;
-                if (b <= a && b <= c) return b;
-
-                return c;
-            }
-        }
-
-        //Проверяет корректность вызываемого элемента из массива
-        bool InTheArray(int x, int y)
-        {
-            if (x >= 0 && y >= 0 &&
-                x < labyrinth.GetLength(0) && y < labyrinth.GetLength(1) &&
-                labyrinth[x, y] != '#')
-                return true;
-            else
-                return false;
-        }
-
-        //Сообщает о достижении выхода из лабиринта
-        bool IsReady(int x, int y)
-        {
-            if (x == labyrinth.GetLength(0) - 1 && y == labyrinth.GetLength(1) - 1)
-            {
-                IsPenetrable = true;
-                return true;
-            }
-            else
-                return false;
         }
     }
 }
